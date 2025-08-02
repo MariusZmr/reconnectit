@@ -1,39 +1,41 @@
-const mysql = require("mysql2/promise")
 const bcrypt = require("bcryptjs")
+const mysql = require("mysql2/promise")
+require("dotenv").config() // Load environment variables
 
 async function createAdminUser() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST || "localhost",
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD || "",
-    database: process.env.DB_NAME || "techforge_pc",
+    database: process.env.DB_NAME || "reconnectit", // Changed database name
   })
 
   try {
-    // Hash the password
-    const password = "admin123"
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const username = "admin"
+    const email = "admin@reconnectit.com" // Changed email domain
+    const password = "admin123" // Default password
 
-    console.log("Creating admin user...")
-    console.log("Password:", password)
-    console.log("Hashed password:", hashedPassword)
+    // Check if admin user already exists
+    const [existingUsers] = await connection.execute("SELECT id FROM users WHERE username = ? OR email = ?", [
+      username,
+      email,
+    ])
 
-    // Delete existing admin user if exists
-    await connection.execute("DELETE FROM users WHERE username = ? OR email = ?", ["admin", "admin@techforgepc.com"])
+    if (existingUsers.length > 0) {
+      console.log("Admin user already exists. Skipping creation.")
+      return
+    }
 
-    // Insert new admin user
+    const passwordHash = await bcrypt.hash(password, 12) // Hash the password
+
     await connection.execute("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)", [
-      "admin",
-      "admin@techforgepc.com",
-      hashedPassword,
+      username,
+      email,
+      passwordHash,
       "admin",
     ])
 
-    console.log("Admin user created successfully!")
-
-    // Verify the user was created
-    const [rows] = await connection.execute("SELECT username, email, role FROM users WHERE username = ?", ["admin"])
-    console.log("Created user:", rows[0])
+    console.log(`Admin user '${username}' created successfully with password '${password}'`)
   } catch (error) {
     console.error("Error creating admin user:", error)
   } finally {

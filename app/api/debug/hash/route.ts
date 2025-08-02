@@ -1,34 +1,28 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { hashPassword, verifyPassword } from "@/lib/auth"
+import { NextResponse } from "next/server"
+import bcrypt from "bcryptjs"
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const { password, hash } = await request.json()
 
     if (password && !hash) {
-      // Hash a password
-      const hashedPassword = await hashPassword(password)
-      return NextResponse.json({
-        password,
-        hash: hashedPassword,
-        message: "Password hashed successfully",
-      })
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 12)
+      console.log(`Password: ${password}, Hashed: ${hashedPassword}`)
+      return NextResponse.json({ password, hashedPassword }, { status: 200 })
+    } else if (password && hash) {
+      // Compare password with hash
+      const match = await bcrypt.compare(password, hash)
+      console.log(`Verifying password: ${password}, Hashed: ${hash}, Match: ${match}`)
+      return NextResponse.json({ password, hash, match }, { status: 200 })
+    } else {
+      return NextResponse.json(
+        { error: "Please provide a password to hash or a password and hash to compare." },
+        { status: 400 },
+      )
     }
-
-    if (password && hash) {
-      // Verify a password against a hash
-      const isValid = await verifyPassword(password, hash)
-      return NextResponse.json({
-        password,
-        hash,
-        isValid,
-        message: isValid ? "Password matches!" : "Password does not match",
-      })
-    }
-
-    return NextResponse.json({ error: "Please provide password and optionally hash" }, { status: 400 })
-  } catch (error) {
-    console.error("Debug hash error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  } catch (error: any) {
+    console.error("Error in debug hash API:", error)
+    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 })
   }
 }

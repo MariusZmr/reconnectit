@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
+import { logout } from "@/lib/auth"
 
 export async function POST() {
   try {
-    const cookieStore = cookies()
-    cookieStore.delete("auth-token")
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("Logout error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    await logout()
+    return NextResponse.json({ message: "Logged out successfully" }, { status: 200 })
+  } catch (error: any) {
+    console.error("API Logout Error:", error)
+    return NextResponse.json({ error: error.message || "Internal server error" }, { status: 500 })
   }
 }

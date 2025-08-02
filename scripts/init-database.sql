@@ -1,6 +1,6 @@
 -- Create database
-CREATE DATABASE IF NOT EXISTS techforge_pc;
-USE techforge_pc;
+CREATE DATABASE IF NOT EXISTS reconnectit; -- Changed database name
+USE reconnectit; -- Changed database name
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (

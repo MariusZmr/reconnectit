@@ -297,7 +297,7 @@ export default function AdminPage() {
               <div className="p-2 bg-blue-500 rounded-xl shadow-lg">
                 <Monitor className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-semibold text-gray-900 dark:text-white">TechForge PC</span>
+              <span className="text-xl font-semibold text-gray-900 dark:text-white">ReconnectIT</span>
             </Link>
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2 text-gray-700 dark:text-gray-300">

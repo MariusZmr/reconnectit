@@ -14,7 +14,7 @@ const dialect = new MysqlDialect({
     host: process.env.DB_HOST || "localhost",
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD || "",
-    database: process.env.DB_NAME || "techforge_pc",
+    database: process.env.DB_NAME || "reconnectit", // Changed database name
     waitForConnections: true,
     connectionLimit: 10,
     maxIdle: 10, // max idle connections, the default value is the same as `connectionLimit`

@@ -1,161 +1,130 @@
 import { db } from "./db"
-import type { Product, ProductFormData } from "./types"
+import type { Product } from "./types"
 
 export async function getAllProducts(): Promise<Product[]> {
   try {
-    const products = await db.selectFrom("products").selectAll().orderBy("created_at", "desc").execute()
-
-    return products.map((product) => ({
-      ...product,
-      specs: JSON.parse(product.specs || "[]"),
+    const products = await db.selectFrom("products").selectAll().execute()
+    return products.map((p) => ({
+      ...p,
+      specs: JSON.parse(p.specs as string), // Parse JSON string back to array
+      price: Number(p.price), // Ensure price is a number
     }))
   } catch (error) {
-    console.error("Error fetching products:", error)
-    return []
+    console.error("Error fetching all products:", error)
+    throw new Error("Failed to fetch all products.")
   }
 }
 
 export async function getVisibleProducts(): Promise<Product[]> {
   try {
-    const products = await db
-      .selectFrom("products")
-      .selectAll()
-      .where("visible", "=", true)
-      .orderBy("created_at", "desc")
-      .execute()
-
-    return products.map((product) => ({
-      ...product,
-      specs: JSON.parse(product.specs || "[]"),
+    const products = await db.selectFrom("products").where("visible", "=", true).selectAll().execute()
+    return products.map((p) => ({
+      ...p,
+      specs: JSON.parse(p.specs as string), // Parse JSON string back to array
+      price: Number(p.price), // Ensure price is a number
     }))
   } catch (error) {
     console.error("Error fetching visible products:", error)
-    return []
+    throw new Error("Failed to fetch visible products.")
   }
 }
 
-export async function getProductById(id: number): Promise<Product | null> {
+export async function getProductById(id: number): Promise<Product | undefined> {
   try {
-    const product = await db.selectFrom("products").selectAll().where("id", "=", id).executeTakeFirst()
-
-    if (!product) return null
-
-    return {
-      ...product,
-      specs: JSON.parse(product.specs || "[]"),
+    const product = await db.selectFrom("products").where("id", "=", id).selectAll().executeTakeFirst()
+    if (product) {
+      return {
+        ...product,
+        specs: JSON.parse(product.specs as string), // Parse JSON string back to array
+        price: Number(product.price), // Ensure price is a number
+      }
     }
+    return undefined
   } catch (error) {
-    console.error("Error fetching product:", error)
-    return null
+    console.error(`Error fetching product with ID ${id}:`, error)
+    throw new Error(`Failed to fetch product with ID ${id}.`)
   }
 }
 
-export async function createProduct(data: ProductFormData): Promise<Product | null> {
+export async function createProduct(productData: Omit<Product, "id" | "created_at" | "updated_at">): Promise<Product> {
   try {
-    const specsArray = data.specs
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-
     const result = await db
       .insertInto("products")
       .values({
-        name: data.name,
-        category: data.category,
-        price: Number.parseFloat(data.price),
-        specs: JSON.stringify(specsArray),
-        description: data.description,
-        image: data.image || null,
-        visible: data.visible,
-        created_at: new Date(),
-        updated_at: new Date(),
+        ...productData,
+        specs: JSON.stringify(productData.specs), // Stringify specs array to JSON
+        price: productData.price.toFixed(2), // Store price as decimal with 2 places
       })
       .executeTakeFirstOrThrow()
 
-    if (result.insertId) {
-      return getProductById(Number(result.insertId))
+    if (!result.insertId) {
+      throw new Error("Failed to get insert ID for new product.")
     }
-    return null
+
+    const newProduct = await getProductById(Number(result.insertId))
+    if (!newProduct) {
+      throw new Error("Failed to retrieve newly created product.")
+    }
+    return newProduct
   } catch (error) {
     console.error("Error creating product:", error)
-    return null
+    throw new Error("Failed to create product.")
   }
 }
 
-export async function updateProduct(id: number, data: ProductFormData): Promise<Product | null> {
+export async function updateProduct(
+  id: number,
+  productData: Partial<Omit<Product, "id" | "created_at" | "updated_at">>,
+): Promise<Product> {
   try {
-    const specsArray =
-      typeof data.specs === "string"
-        ? data.specs
-            .split(",")
-            .map((s) => s.trim())
-            .filter((s) => s.length > 0)
-        : data.specs
+    const updatedData: any = { ...productData }
+    if (updatedData.specs) {
+      updatedData.specs = JSON.stringify(updatedData.specs) // Stringify specs array to JSON
+    }
+    if (updatedData.price) {
+      updatedData.price = Number(updatedData.price).toFixed(2) // Ensure price is formatted
+    }
 
-    console.log("Updating product with data:", {
-      id,
-      name: data.name,
-      category: data.category,
-      price: data.price,
-      specs: specsArray,
-      description: data.description,
-      image: data.image,
-      visible: data.visible,
-    })
+    await db.updateTable("products").set(updatedData).where("id", "=", id).execute()
 
-    await db
-      .updateTable("products")
-      .set({
-        name: data.name,
-        category: data.category,
-        price: Number.parseFloat(data.price.toString()),
-        specs: JSON.stringify(specsArray),
-        description: data.description,
-        image: data.image || null,
-        visible: data.visible,
-        updated_at: new Date(),
-      })
-      .where("id", "=", id)
-      .execute()
-
-    console.log("Product updated successfully")
-    return getProductById(id)
+    const updatedProduct = await getProductById(id)
+    if (!updatedProduct) {
+      throw new Error("Failed to retrieve updated product.")
+    }
+    return updatedProduct
   } catch (error) {
-    console.error("Error updating product:", error)
-    throw error // Re-throw to handle in API route
+    console.error(`Error updating product with ID ${id}:`, error)
+    throw new Error(`Failed to update product with ID ${id}.`)
   }
 }
 
-export async function deleteProduct(id: number): Promise<boolean> {
+export async function deleteProduct(id: number): Promise<void> {
   try {
-    const result = await db.deleteFrom("products").where("id", "=", id).executeTakeFirst()
-
-    return result.numDeletedRows > 0
+    await db.deleteFrom("products").where("id", "=", id).execute()
   } catch (error) {
-    console.error("Error deleting product:", error)
-    return false
+    console.error(`Error deleting product with ID ${id}:`, error)
+    throw new Error(`Failed to delete product with ID ${id}.`)
   }
 }
 
-export async function toggleProductVisibility(id: number): Promise<boolean> {
+export async function toggleProductVisibility(id: number): Promise<Product> {
   try {
-    // Fetch current visibility
-    const product = await db.selectFrom("products").select("visible").where("id", "=", id).executeTakeFirst()
+    const product = await getProductById(id)
+    if (!product) {
+      throw new Error("Product not found.")
+    }
 
-    if (!product) return false
+    const newVisibility = !product.visible
 
-    await db
-      .updateTable("products")
-      .set({
-        visible: !product.visible,
-        updated_at: new Date(),
-      })
-      .where("id", "=", id)
-      .execute()
+    await db.updateTable("products").set({ visible: newVisibility }).where("id", "=", id).execute()
 
-    return true
+    const updatedProduct = await getProductById(id)
+    if (!updatedProduct) {
+      throw new Error("Failed to retrieve product after toggling visibility.")
+    }
+    return updatedProduct
   } catch (error) {
-    console.error("Error toggling product visibility:", error)
-    return false
+    console.error(`Error toggling visibility for product with ID ${id}:`, error)
+    throw new Error(`Failed to toggle product visibility for ID ${id}.`)
   }
 }
