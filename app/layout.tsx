@@ -7,11 +7,11 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "TechForge PC - Custom PC Builds & Optimization Services",
+  title: "ReconnectIT - Custom PC Builds & Optimization Services",
   description:
     "Professional PC building, optimization, and technical support services. Custom gaming rigs, workstations, and performance upgrades.",
   keywords: "PC building, custom computers, gaming PC, workstation, PC optimization, computer repair",
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({

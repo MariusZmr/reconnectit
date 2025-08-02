@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Monitor, Cpu, HardDrive, Zap, Settings, Shield, Phone, Mail, MapPin, Menu } from "lucide-react"
+import { Cpu, HardDrive, Zap, Settings, Shield, Phone, Mail, MapPin, Menu } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -14,10 +14,15 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-500 rounded-xl shadow-lg">
-                <Monitor className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-semibold text-gray-900 dark:text-white">TechForge PC</span>
+              {/* Replaced Monitor icon with new logo */}
+              <Image
+                src="/images/reconnectit-logo.png"
+                alt="ReconnectIT Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+              />
+              <span className="text-xl font-semibold text-gray-900 dark:text-white">ReconnectIT</span>
             </div>
             <div className="hidden md:flex items-center space-x-6">
               <Link
@@ -267,7 +272,8 @@ export default function HomePage() {
             <Card className="bg-white/70 backdrop-blur-xl border-gray-200/50 hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden dark:bg-gray-800/70 dark:border-gray-700/50">
               <CardHeader className="pb-4">
                 <div className="p-3 bg-cyan-100 rounded-xl w-fit mb-4 dark:bg-cyan-900/30">
-                  <Monitor className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
+                  <Cpu className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />{" "}
+                  {/* Changed from Monitor to Cpu for variety */}
                 </div>
                 <CardTitle className="text-gray-900 text-xl dark:text-white">Consultation</CardTitle>
                 <CardDescription className="text-gray-600 dark:text-gray-300">
@@ -301,7 +307,7 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 dark:text-white">
-                Why Choose TechForge PC?
+                Why Choose ReconnectIT?
               </h2>
               <p className="text-lg text-gray-600 mb-8 dark:text-gray-300">
                 With over 8 years of experience in PC building and optimization, we've helped hundreds of clients
@@ -395,7 +401,7 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-900 font-semibold text-lg dark:text-white">info@techforgepc.com</p>
+                <p className="text-gray-900 font-semibold text-lg dark:text-white">info@reconnectit.com</p>
               </CardContent>
             </Card>
 
@@ -424,12 +430,17 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <div className="p-2 bg-blue-500 rounded-xl shadow-lg">
-                <Monitor className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-lg font-semibold text-gray-900 dark:text-white">TechForge PC</span>
+              {/* Replaced Monitor icon with new logo */}
+              <Image
+                src="/images/reconnectit-logo.png"
+                alt="ReconnectIT Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+              />
+              <span className="text-lg font-semibold text-gray-900 dark:text-white">ReconnectIT</span>
             </div>
-            <p className="text-gray-600 dark:text-gray-400">© 2024 TechForge PC. All rights reserved.</p>
+            <p className="text-gray-600 dark:text-gray-400">© 2024 ReconnectIT. All rights reserved.</p>
           </div>
         </div>
       </footer>
